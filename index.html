@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hidden Cost of the FOG — A VCM Financing Diagnostic</title>
+<style>
+  :root{--navy:#1B3A6B;--ink:#0F1E33;--gold:#C9A428;--paper:#FBFAF6;--panel:#FFFFFF;--rule:#D8D2C4;--label:#5A6473;--soft:#EFEBDF;--youbar:#B9C0CC;--capbg:#F6F2E4;}
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:940px;margin:0 auto;padding:0 24px;}
+  .hero{background:var(--navy);color:#fff;padding:64px 0 58px;position:relative;overflow:hidden;}
+  .hero::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:5px;background:var(--gold);}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:0 0 18px;}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(38px,7vw,68px);line-height:1.02;margin:0 0 14px;letter-spacing:-.01em;}
+  .fogkey{font-family:Georgia,serif;font-style:italic;font-size:clamp(17px,2.4vw,23px);color:rgba(255,255,255,.72);margin:-4px 0 22px;letter-spacing:.01em;}
+  .reframe{font-size:clamp(17px,2.4vw,21px);max-width:660px;color:rgba(255,255,255,.9);margin:0;}
+  .reframe b{color:var(--gold);font-weight:400;font-style:italic;font-family:Georgia,serif;}
+  section{padding:52px 0;}
+  .kicker{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--navy);font-weight:700;margin:0 0 6px;}
+  .kicker .num{color:var(--gold);}
+  h2{font-family:Georgia,serif;font-weight:700;font-size:clamp(26px,4vw,38px);line-height:1.08;margin:0 0 8px;color:var(--ink);}
+  .lede{font-size:16px;color:var(--label);max-width:640px;margin:0 0 30px;}
+  .card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;box-shadow:0 18px 40px -28px rgba(15,30,51,.35);}
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;padding:18px 26px;border-bottom:1px solid var(--rule);background:var(--soft);}
+  .card-head .t{font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px;color:var(--navy);}
+  .card-head .d{font-size:12px;color:var(--label);}
+  .grid{display:grid;grid-template-columns:1fr 1fr;}
+  .field{padding:20px 26px;border-bottom:1px solid var(--rule);}
+  .field:nth-child(odd){border-right:1px solid var(--rule);}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+  .field .hint{font-size:12px;color:var(--label);margin-bottom:11px;min-height:16px;}
+  .field.full{grid-column:1/-1;}
+  input[type="text"],select{width:100%;font-family:inherit;font-size:16px;color:var(--ink);border:1px solid var(--rule);border-radius:3px;padding:11px 12px;background:#fff;transition:border-color .15s,box-shadow .15s;}
+  input[type="text"]:focus,select:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,58,107,.12);}
+  .slider-row{display:flex;align-items:center;gap:14px;}
+  .slider-row input[type="range"]{flex:1;accent-color:var(--navy);height:4px;}
+  .slider-val{font-family:"Courier New",monospace;font-weight:700;font-size:16px;color:var(--navy);min-width:58px;text-align:right;}
+  .prefix{position:relative;}
+  .prefix span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--label);font-size:16px;}
+  .prefix input{padding-left:26px;}
+  .build-field{background:var(--capbg);}
+  .build-field input[type="range"]{accent-color:var(--gold);}
+  .ledger{background:var(--panel);border:1px solid var(--rule);border-radius:4px;box-shadow:0 24px 60px -34px rgba(15,30,51,.45);overflow:hidden;}
+  .lrow{display:grid;grid-template-columns:1.55fr 1fr 1fr;align-items:center;}
+  .lhead{background:var(--navy);color:#fff;}
+  .lhead>div{padding:18px 22px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;}
+  .lhead .you-h{color:rgba(255,255,255,.7);text-align:right;}
+  .lhead .cap-h{color:var(--gold);text-align:right;}
+  .cap-col{background:var(--capbg);}
+  .row{border-bottom:1px solid var(--rule);}
+  .metric{padding:18px 22px;}
+  .metric .m-h{font-weight:700;font-size:15.5px;color:var(--ink);}
+  .metric .m-p{font-size:12.5px;color:var(--label);margin-top:3px;max-width:330px;}
+  .cell{padding:18px 22px;text-align:right;}
+  .cell.cap-col{box-shadow:inset 3px 0 0 var(--gold);}
+  .cell .v{font-family:"Courier New",monospace;font-weight:700;font-size:18px;color:var(--ink);display:block;}
+  .cell.cap-col .v{color:var(--navy);}
+  .cell .bar{height:5px;background:#E7E3D7;border-radius:3px;margin-top:9px;overflow:hidden;}
+  .cell .bar i{display:block;height:100%;width:0;background:var(--youbar);transition:width .8s ease;}
+  .cell.cap-col .bar i{background:var(--gold);}
+  .cell .none{font-family:Arial;font-size:15px;color:var(--label);font-weight:400;}
+  .totline{display:grid;grid-template-columns:1.55fr 1fr 1fr;border-top:2px solid var(--navy);background:var(--soft);}
+  .totline .metric .m-h{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--navy);}
+  .totline .cell .v{font-size:22px;}
+  .totline .cell.cap-col{background:var(--capbg);}
+  .gapband{background:var(--navy);color:#fff;padding:26px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+  .gapband .lbl{font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);}
+  .gapband .lbl small{display:block;font-weight:400;text-transform:none;letter-spacing:0;font-size:12.5px;color:rgba(255,255,255,.7);margin-top:5px;max-width:400px;}
+  .gapband .big{font-family:"Courier New",monospace;font-weight:700;font-size:clamp(34px,6.5vw,54px);line-height:1;color:#fff;}
+  .gapband .pct{font-family:Arial;font-size:13px;color:rgba(255,255,255,.7);text-align:right;margin-top:8px;}
+  .gapband .pct b{color:var(--gold);}
+  .sens{margin-top:28px;background:var(--capbg);border:1px solid var(--rule);border-left:4px solid var(--gold);border-radius:4px;padding:22px 26px;}
+  .sens-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;}
+  .sens-head .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--navy);}
+  .sens-head .sens-val{font-family:"Courier New",monospace;font-weight:700;font-size:22px;color:var(--navy);}
+  .sens-q{font-family:Georgia,serif;font-size:19px;color:var(--ink);margin:8px 0 8px;font-weight:700;}
+  .sens-p{font-size:13.5px;color:var(--label);margin:0 0 16px;max-width:640px;}
+  .sens input[type="range"]{width:100%;accent-color:var(--gold);height:5px;}
+  .sens-scale{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--label);font-weight:700;margin-top:6px;}
+  .reading{margin-top:34px;border-left:3px solid var(--gold);padding:4px 0 4px 26px;}
+  .reading p{font-size:17px;margin:0 0 16px;max-width:660px;}
+  .aph{font-family:Georgia,serif;font-style:italic;font-size:clamp(20px,3vw,26px);color:var(--navy);line-height:1.3;margin:30px 0;max-width:680px;}
+  details.assume{margin-top:34px;border:1px solid var(--rule);border-radius:4px;background:var(--panel);}
+  details.assume summary{cursor:pointer;list-style:none;padding:18px 24px;font-weight:700;font-size:14px;color:var(--navy);display:flex;justify-content:space-between;align-items:center;}
+  details.assume summary::-webkit-details-marker{display:none;}
+  details.assume summary .chev{transition:transform .2s;color:var(--gold);font-size:18px;}
+  details.assume[open] summary .chev{transform:rotate(45deg);}
+  .assume-body{padding:6px 24px 24px;border-top:1px solid var(--rule);}
+  .assume-body .intro{font-size:14px;color:var(--label);margin:16px 0 22px;max-width:600px;}
+  .arow{display:grid;grid-template-columns:1fr 120px;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule);}
+  .arow:last-child{border-bottom:none;}
+  .arow .an{font-weight:700;font-size:14px;color:var(--ink);}
+  .arow .ar{font-size:12.5px;color:var(--label);margin-top:2px;max-width:520px;}
+  .arow .aset{display:flex;align-items:center;gap:8px;}
+  .arow input[type="range"]{flex:1;accent-color:var(--gold);height:4px;}
+  .arow .av{font-family:"Courier New",monospace;font-weight:700;font-size:14px;color:var(--navy);min-width:44px;text-align:right;}
+  .cta{background:var(--navy);color:#fff;border-radius:4px;padding:46px 40px;position:relative;overflow:hidden;}
+  .cta::before{content:"";position:absolute;top:0;left:0;width:5px;height:100%;background:var(--gold);}
+  .cta h3{font-family:Georgia,serif;font-size:clamp(24px,3.5vw,32px);margin:0 0 14px;line-height:1.12;}
+  .cta p{color:rgba(255,255,255,.86);font-size:16px;max-width:560px;margin:0 0 26px;}
+  .btn{display:inline-block;background:var(--gold);color:var(--ink);font-weight:700;text-decoration:none;padding:15px 30px;border-radius:3px;font-size:15px;letter-spacing:.02em;transition:transform .15s,box-shadow .15s;border:none;cursor:pointer;font-family:inherit;}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px -10px rgba(0,0,0,.5);}
+  .cta .fine{font-size:13px;color:rgba(255,255,255,.55);margin:22px 0 0;}
+  footer{padding:38px 0 56px;border-top:1px solid var(--rule);margin-top:56px;}
+  footer .f{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+  footer .logo{font-family:Georgia,serif;font-weight:700;font-size:18px;color:var(--navy);}
+  footer .logo small{display:block;font-family:Arial;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--label);font-weight:700;margin-top:3px;}
+  footer .tm{font-size:12px;color:var(--label);text-align:right;line-height:1.7;}
+  .ladder{border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--panel);box-shadow:0 18px 40px -28px rgba(15,30,51,.35);}
+  .lad{display:grid;grid-template-columns:210px 1fr 132px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--rule);}
+  .lad:last-child{border-bottom:none;}
+  .lad.active{background:var(--capbg);box-shadow:inset 4px 0 0 var(--gold);}
+  .lad .name{font-weight:700;font-size:14.5px;color:var(--ink);}
+  .lad .name small{display:block;font-weight:400;font-size:11.5px;color:var(--label);margin-top:2px;}
+  .lad .track{height:24px;background:#EBE7DB;border-radius:3px;overflow:hidden;margin:0 18px;}
+  .lad .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--navy),#3160A0);transition:width .8s ease;}
+  .lad.active .track i{background:linear-gradient(90deg,var(--gold),#E0BE4F);}
+  .lad .amt{font-family:"Courier New",monospace;font-weight:700;font-size:17px;color:var(--navy);text-align:right;}
+  .lad .amt small{display:block;font-family:Arial;font-weight:400;font-size:11px;color:var(--label);margin-top:1px;}
+  @media (max-width:700px){.lad{grid-template-columns:1fr;gap:8px;}.lad .track{margin:0;}.lad .amt{text-align:left;}}
+  @media (max-width:700px){
+    .grid{grid-template-columns:1fr;}
+    .field:nth-child(odd){border-right:none;}
+    .lrow,.totline{grid-template-columns:1fr;}
+    .lhead{display:none;}
+    .metric{padding-bottom:6px;}
+    .cell{display:flex;justify-content:space-between;align-items:center;text-align:left;padding-top:8px;padding-bottom:8px;}
+    .cell::before{content:attr(data-label);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--label);}
+    .cell.cap-col::before{color:var(--navy);}
+    .cell .bar{display:none;}
+    .row{padding-bottom:10px;}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}.cell .bar i{transition:none;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <p class="eyebrow">A VCM Financing Diagnostic</p>
+    <h1>The Hidden Cost<br>of the FOG</h1>
+    <p class="fogkey">The Financing Opportunity Gap</p>
+    <p class="reframe">Financing is a ladder. At the bottom you hand it to someone else; at the top you own it. <b>The FOG is the distance from where you stand to the top — in dollars.</b></p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <p class="kicker"><span class="num">01</span> &nbsp;Your program</p>
+    <h2>Five numbers. Three minutes.</h2>
+    <p class="lede">Describe the business and where your financing sits today. We'll set it beside a fully built captive and show you the distance between them.</p>
+
+    <div class="card">
+      <div class="card-head"><span class="t">Your inputs</span><span class="d">Estimates only · nothing leaves your browser</span></div>
+      <div class="grid">
+        <div class="field full">
+          <label for="program">How financing runs today</label>
+          <div class="hint">This sets where you start on the captive ladder. Adjust the build-out below if it's off.</div>
+          <select id="program">
+            <option value="none">Nothing formal — mostly cash, check, or buyer's own bank</option>
+            <option value="list">We provide our buyers with a list of lenders</option>
+            <option value="referral">We refer buyers to a third-party lender</option>
+            <option value="whitelabel">We offer a white-label turnkey finance program through our bank partner.</option>
+            <option value="inhouse">We run something in-house already</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="units">Units sold per year</label>
+          <div class="hint">Finance-eligible units across the line.</div>
+          <input type="text" id="units" inputmode="numeric" value="5,000">
+        </div>
+        <div class="field">
+          <label for="price">Average unit price</label>
+          <div class="hint">Typical transaction size.</div>
+          <div class="prefix"><span>$</span><input type="text" id="price" inputmode="numeric" value="40,000"></div>
+        </div>
+        <div class="field">
+          <label for="margin">Gross margin per unit</label>
+          <div class="hint">What you keep on the sale — a property of the product, not the financing.</div>
+          <div class="slider-row"><input type="range" id="margin" min="5" max="45" step="0.5" value="25"><span class="slider-val" id="marginVal">25%</span></div>
+        </div>
+        <div class="field">
+          <label for="dealers">Do you sell through dealers?</label>
+          <div class="hint">Financing follows whoever makes the deal easy.</div>
+          <select id="dealers">
+            <option value="yes">Yes — dealers or distributors carry the sale</option>
+            <option value="no">No — we sell direct</option>
+          </select>
+        </div>
+        <div class="field full build-field">
+          <label for="build">Captive build-out today</label>
+          <div class="hint">How much of a full captive program — owned approvals, the spread, the customer, dealer loyalty — you've already put in place. Your posture sets a starting point; drag if it's off.</div>
+          <div class="slider-row"><input type="range" id="build" min="0" max="100" value="0"><span class="slider-val" id="buildVal">0%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:8px;">
+  <div class="wrap">
+    <p class="kicker"><span class="num">02</span> &nbsp;The full ladder</p>
+    <h2>Widest at the bottom rung, narrowest at the top</h2>
+    <p class="lede">Every posture, same business, ranked by the gap it leaves on the table. The less you've built, the more sits in the fog. Your selection is highlighted; change any input and all five move together.</p>
+    <div class="ladder" id="ladder"></div>
+  </div>
+</section>
+
+<section style="padding-top:8px;">
+  <div class="wrap">
+    <p class="kicker"><span class="num">03</span> &nbsp;The comparison</p>
+    <h2>Where you stand, beside a full captive</h2>
+    <p class="lede">The captive column is the whole ladder — every dollar a built captive earns for a business your size. Your column is the share you've already built. Annual figures.</p>
+
+    <div class="ledger" id="ledger">
+      <div class="lrow lhead">
+        <div>Where the line splits</div>
+        <div class="you-h">Your program</div>
+        <div class="cap-h">A full captive</div>
+      </div>
+
+      <div class="lrow row">
+        <div class="metric"><div class="m-h">Captive build-out</div><div class="m-p">Share of a full captive you've put in place.</div></div>
+        <div class="cell" data-label="Your program"><span class="v" id="youBuild">0%</span><div class="bar"><i id="youBuildBar"></i></div></div>
+        <div class="cell cap-col" data-label="A full captive"><span class="v" id="capBuild">100%</span><div class="bar"><i id="capBuildBar"></i></div></div>
+      </div>
+
+      <div class="lrow row">
+        <div class="metric"><div class="m-h">Finance income</div><div class="m-p">The spread a captive earns on every financed dollar.</div></div>
+        <div class="cell" data-label="Your program"><span class="v" id="youFin">$0</span></div>
+        <div class="cell cap-col" data-label="A full captive"><span class="v" id="capFin">$0</span></div>
+      </div>
+
+      <div class="lrow row">
+        <div class="metric"><div class="m-h">Retained-customer revenue</div><div class="m-p">Repeat, parts, and service that follows the relationship.</div></div>
+        <div class="cell" data-label="Your program"><span class="v" id="youRet">$0</span></div>
+        <div class="cell cap-col" data-label="A full captive"><span class="v" id="capRet">$0</span></div>
+      </div>
+
+      <div class="lrow row">
+        <div class="metric"><div class="m-h">Net-new sales margin</div><div class="m-p">Sales the financing wins that cash alone would have lost.</div></div>
+        <div class="cell" data-label="Your program"><span class="v" id="youSales">$0</span></div>
+        <div class="cell cap-col" data-label="A full captive"><span class="v" id="capSales">$0</span></div>
+      </div>
+
+      <div class="lrow row" id="dealerRow">
+        <div class="metric"><div class="m-h">Dealer volume held</div><div class="m-p">Margin the channel keeps instead of steering elsewhere.</div></div>
+        <div class="cell" data-label="Your program"><span class="v" id="youDealer">$0</span></div>
+        <div class="cell cap-col" data-label="A full captive"><span class="v" id="capDealer">$0</span></div>
+      </div>
+
+      <div class="totline">
+        <div class="metric"><div class="m-h">Annual contribution from financing</div></div>
+        <div class="cell" data-label="Your program"><span class="v" id="youTotal">$0</span></div>
+        <div class="cell cap-col" data-label="A full captive"><span class="v" id="capTotal">$0</span></div>
+      </div>
+
+      <div class="gapband">
+        <div class="lbl">Your FOG<small>The Financing Opportunity Gap — the captive economics you haven't built yet.</small></div>
+        <div style="text-align:right;">
+          <div class="big" id="gap">$0</div>
+          <div class="pct" id="pctTag"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sens">
+      <div class="sens-head"><span class="k">The sensitivity lever</span><span class="sens-val" id="aNewSaleV">65%</span></div>
+      <div class="sens-q">How much of the new financing is a sale you'd have lost otherwise?</div>
+      <p class="sens-p">A captive pulls more buyers into financing. Some would never have bought without it — those earn full margin. The rest would have paid cash, and still hand you finance income and a kept relationship. Set the share that's net-new, and watch your FOG move. The headline runs this aggressive by default.</p>
+      <input type="range" id="aNewSale" min="0" max="100" value="65">
+      <div class="sens-scale"><span>Conservative — all payment-method shift</span><span>Aggressive — all net-new sales</span></div>
+    </div>
+
+    <div class="reading">
+      <p>Picture a single ladder. At the bottom, financing is something you hand to someone else. At the top, you own all of it — the approval, the spread, the customer who comes back, the dealer who stops shopping around. The FOG is the distance from where you stand to the top of that ladder, counted in dollars.</p>
+      <p>The OEMs near the top didn't add another bank. They built the captive economics into the sale, one rung at a time. The further down you are, the more of it is still sitting there — which is why the widest gap belongs to the program doing the least, and the narrowest to the one already most of the way up.</p>
+    </div>
+
+    <div class="aph">A financing program isn't a cost center or a profit center. It's a decision about who keeps the customer.</div>
+
+    <details class="assume">
+      <summary>The math, itemized — every assumption is yours to move <span class="chev">+</span></summary>
+      <div class="assume-body">
+        <p class="intro">Here's the engine. The captive ceiling is the full annual economics a built captive delivers for your business; your build-out is how much of it you already capture. Tune any figure — the ledger updates as you do.</p>
+        <div class="arow"><div><div class="an">Captive attach rate</div><div class="ar">Share of buyers a full captive finances.</div></div><div class="aset"><input type="range" id="aAttach" min="30" max="80" value="55"><span class="av" id="aAttachV">55%</span></div></div>
+        <div class="arow"><div><div class="an">Annual finance spread</div><div class="ar">Income a captive earns on financed principal each year.</div></div><div class="aset"><input type="range" id="aSpread" min="0" max="80" value="35"><span class="av" id="aSpreadV">3.5%</span></div></div>
+        <div class="arow"><div><div class="an">Retained-customer uplift</div><div class="ar">Annual repeat, service, and parts revenue per captive customer, as a share of unit price.</div></div><div class="aset"><input type="range" id="aClv" min="0" max="12" value="5"><span class="av" id="aClvV">5%</span></div></div>
+        <div class="arow"><div><div class="an">Dealer volume diverted</div><div class="ar">Channel volume that drifts to competitors without a captive — recovered when you build one.</div></div><div class="aset"><input type="range" id="aDealer" min="0" max="15" value="8"><span class="av" id="aDealerV">8%</span></div></div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="cta">
+      <h3>You've seen the number the fog was hiding. Building the rungs is the next conversation.</h3>
+      <p>The full diagnostic runs your real numbers — approval data, attach rates, dealer flow — and shows exactly which rungs you're missing and what it takes to climb them. If you want to close the distance, that's where we start.</p>
+      <button class="btn" onclick="document.getElementById('units').scrollIntoView();">Request the full diagnostic</button>
+      <p class="fine">Vanguard Captive Management · The Virtual Captive™ program · Irvine, California</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap f">
+    <div class="logo">Vanguard Captive Management<small>Captive economics. No balance sheet.</small></div>
+    <div class="tm">Virtual Captive™ is a managed finance program.<br>Figures are directional estimates for discussion, not an offer of credit.</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function fmt(n){return "$"+Math.round(n).toLocaleString("en-US");}
+  function parseNum(s){var v=parseFloat(String(s).replace(/[^0-9.]/g,""));return isNaN(v)?0:v;}
+  function commafy(el){var v=parseNum(el.value);if(v>0){el.value=v.toLocaleString("en-US");}}
+
+  // posture -> captive build-out (maturity) it sets as a starting point
+  var presets={
+    none:      {build:0,  hint:"Financing is handed off entirely — none of a captive is built yet."},
+    list:      {build:20, hint:"Buyers shop a list; you own little of the economics."},
+    referral:  {build:35, hint:"You point to a lender and keep the sale, not the financing."},
+    whitelabel:{build:60, hint:"Your brand runs the program; the bank still funds and keeps the spread."},
+    inhouse:   {build:78, hint:"You own most of it already — the last rungs are what remain."}
+  };
+
+  var LADDER=[
+    ["none","Nothing formal","cash, check, or the buyer's own bank"],
+    ["list","List of lenders","buyers shop a list you hand them"],
+    ["referral","Refer to a lender","you keep the sale, not the financing"],
+    ["whitelabel","White-label program","your brand, the bank's spread"],
+    ["inhouse","In-house already","you own most of it already"]
+  ];
+
+  var els={
+    program:$("program"),units:$("units"),price:$("price"),margin:$("margin"),
+    dealers:$("dealers"),build:$("build"),
+    aAttach:$("aAttach"),aSpread:$("aSpread"),aClv:$("aClv"),aDealer:$("aDealer"),aNewSale:$("aNewSale")
+  };
+
+  var anim={};
+  function countTo(el,target,key){
+    var start=anim[key]||0;
+    var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(reduce){anim[key]=target;el.textContent=fmt(target);return;}
+    var t0=null,dur=520;
+    function step(ts){
+      if(!t0)t0=ts;
+      var p=Math.min(1,(ts-t0)/dur),e=1-Math.pow(1-p,3),cur=start+(target-start)*e;
+      el.textContent=fmt(cur);
+      if(p<1)requestAnimationFrame(step);else anim[key]=target;
+    }
+    requestAnimationFrame(step);
+  }
+  function setMoney(el,val,key){
+    if(val>0.5){el.classList.remove("none");countTo(el,val,key);}
+    else{anim[key]=0;el.textContent="\u2014";el.classList.add("none");}
+  }
+
+  function compute(){
+    var units=parseNum(els.units.value);
+    var price=parseNum(els.price.value);
+    var m=+els.margin.value/100;
+    var dealers=els.dealers.value==="yes";
+    var mat=+els.build.value/100;
+
+    var capAtt=+els.aAttach.value/100;
+    var spread=(+els.aSpread.value/10)/100;
+    var clv=+els.aClv.value/100;
+    var dealerDiv=+els.aDealer.value/100;
+    var newSale=+els.aNewSale.value/100;
+
+    var mPer=price*m;
+    var finC=capAtt*units*price*spread;          // finance income a captive earns
+    var retC=capAtt*units*price*clv;              // retained-customer revenue
+    var salesC=capAtt*units*newSale*mPer;         // net-new sales margin
+    var dealerC=dealers?units*dealerDiv*mPer:0;   // dealer volume held
+    var total=finC+retC+salesC+dealerC;           // the captive ceiling
+
+    return {
+      units:units,dealers:dealers,mat:mat,
+      finC:finC,retC:retC,salesC:salesC,dealerC:dealerC,total:total,
+      youFin:finC*mat,youRet:retC*mat,youSales:salesC*mat,youDealer:dealerC*mat,
+      youTotal:total*mat,capTotal:total,gap:total*(1-mat),revenue:units*price
+    };
+  }
+
+  function renderLadder(total){
+    var cur=els.program.value, html="";
+    LADDER.forEach(function(p){
+      var b=presets[p[0]].build/100, fog=total*(1-b), w=total>0?(fog/total*100):0;
+      html+='<div class="lad'+(p[0]===cur?' active':'')+'">'+
+        '<div class="name">'+p[1]+'<small>'+p[2]+'</small></div>'+
+        '<div class="track"><i style="width:'+w.toFixed(1)+'%"></i></div>'+
+        '<div class="amt">'+fmt(fog)+'<small>'+Math.round(b*100)+'% built</small></div></div>';
+    });
+    $("ladder").innerHTML=html;
+  }
+
+  function render(){
+    var r=compute();
+    renderLadder(r.total);
+
+    // build-out row
+    $("youBuild").textContent=Math.round(r.mat*100)+"%";
+    $("capBuild").textContent="100%";
+    $("youBuildBar").style.width=(r.mat*100)+"%";
+    $("capBuildBar").style.width="100%";
+
+    $("dealerRow").style.display=r.dealers?"":"none";
+
+    setMoney($("youFin"),r.youFin,"yf"); countTo($("capFin"),r.finC,"cf");
+    setMoney($("youRet"),r.youRet,"yr"); countTo($("capRet"),r.retC,"cr");
+    setMoney($("youSales"),r.youSales,"ys"); countTo($("capSales"),r.salesC,"cs");
+    if(r.dealers){setMoney($("youDealer"),r.youDealer,"yd"); countTo($("capDealer"),r.dealerC,"cdl");}
+    setMoney($("youTotal"),r.youTotal,"yt"); countTo($("capTotal"),r.capTotal,"ct");
+    countTo($("gap"),r.gap,"gap");
+
+    var pct=r.revenue>0?(r.gap/r.revenue*100):0;
+    $("pctTag").innerHTML="≈ <b>"+pct.toFixed(1)+"%</b> of annual revenue";
+  }
+
+  function bind(s,o,suf,div){s.addEventListener("input",function(){o.textContent=(div?(s.value/div).toFixed(1):s.value)+(suf||"");render();});}
+  bind(els.margin,$("marginVal"),"%");
+  bind(els.build,$("buildVal"),"%");
+  els.aAttach.addEventListener("input",function(){$("aAttachV").textContent=this.value+"%";render();});
+  els.aSpread.addEventListener("input",function(){$("aSpreadV").textContent=(this.value/10).toFixed(1)+"%";render();});
+  els.aClv.addEventListener("input",function(){$("aClvV").textContent=this.value+"%";render();});
+  els.aDealer.addEventListener("input",function(){$("aDealerV").textContent=this.value+"%";render();});
+  els.aNewSale.addEventListener("input",function(){$("aNewSaleV").textContent=this.value+"%";render();});
+
+  ["units","price"].forEach(function(id){
+    els[id].addEventListener("input",render);
+    els[id].addEventListener("blur",function(){commafy(els[id]);render();});
+  });
+
+  els.program.addEventListener("change",function(){
+    var p=presets[this.value];
+    if(p){els.build.value=p.build;$("buildVal").textContent=p.build+"%";}
+    render();
+  });
+  els.dealers.addEventListener("change",render);
+
+  render();
+})();
+</script>
+</body>
+</html>
