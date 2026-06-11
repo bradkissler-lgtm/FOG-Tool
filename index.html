@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FOG Diagnostic Tool</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f4f6f9;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      color: #555;
+      max-width: 540px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 2rem;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: #4a90d9; }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #analyzeBtn {
+      background: #4a90d9;
+      color: #fff;
+    }
+
+    #analyzeBtn:hover { background: #357abd; }
+
+    #clearBtn {
+      background: #e9ecef;
+      color: #333;
+    }
+
+    #clearBtn:hover { background: #d0d4da; }
+
+    #results {
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .metric:last-child { border-bottom: none; }
+
+    .metric-name { color: #444; }
+
+    .metric-value {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .fog-badge {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+      width: 100%;
+    }
+
+    .fog-easy    { background: #d4edda; color: #155724; }
+    .fog-medium  { background: #fff3cd; color: #856404; }
+    .fog-hard    { background: #f8d7da; color: #721c24; }
+
+    .interpretation {
+      margin-top: 1rem;
+      font-size: 0.88rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.8rem;
+      color: #999;
+      text-align: center;
+    }
+
+    footer a { color: #4a90d9; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>FOG Diagnostic Tool</h1>
+  <p>Measure the readability of any text using the <strong>Gunning Fog Index</strong>.
+     Lower scores indicate easier reading; higher scores suggest complex writing.</p>
+</header>
+
+<div class="card">
+  <label for="textInput">Paste or type your text below:</label>
+  <textarea id="textInput" placeholder="Enter at least one sentence to analyse…"></textarea>
+
+  <div class="actions">
+    <button id="analyzeBtn">Analyse</button>
+    <button id="clearBtn">Clear</button>
+  </div>
+
+  <div id="results">
+    <div class="metric">
+      <span class="metric-name">Word count</span>
+      <span class="metric-value" id="wordCount">—</span>
+    </div>
+    <div class="metric">
+      <span class="metric-name">Sentence count</span>
+      <span class="metric-value" id="sentenceCount">—</span>
+    </div>
+    <div class="metric">
+      <span class="metric-name">Complex words (3+ syllables)</span>
+      <span class="metric-value" id="complexCount">—</span>
+    </div>
+    <div class="metric">
+      <span class="metric-name">Average words per sentence</span>
+      <span class="metric-value" id="avgWords">—</span>
+    </div>
+    <div class="metric">
+      <span class="metric-name">Gunning Fog Index</span>
+      <span class="metric-value" id="fogIndex">—</span>
+    </div>
+
+    <div class="fog-badge" id="fogBadge"></div>
+
+    <p class="interpretation" id="fogInterpretation"></p>
+  </div>
+</div>
+
+<footer>
+  <p>
+    Formula: FOG = 0.4 × (words/sentences + 100 × complex-words/words)<br>
+    <a href="https://en.wikipedia.org/wiki/Gunning_fog_index" target="_blank" rel="noopener">
+      Learn more about the Gunning Fog Index
+    </a>
+  </p>
+</footer>
+
+<script>
+  // ---------- helpers ----------
+
+  function countSyllables(word) {
+    word = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (!word) return 0;
+    // remove silent trailing e
+    word = word.replace(/e$/, '');
+    const matches = word.match(/[aeiouy]+/g);
+    return matches ? matches.length : 1;
+  }
+
+  function isComplex(word) {
+    // proper nouns, compound words and common suffixes are excluded per Gunning's rules
+    const cleaned = word.replace(/[^a-zA-Z]/g, '');
+    if (!cleaned) return false;
+    // skip words with common easy suffixes that inflate count
+    if (/(?:ing|ed|es|er|ly)$/i.test(cleaned)) {
+      const root = cleaned.replace(/(?:ing|ed|es|er|ly)$/i, '');
+      if (countSyllables(root) >= 2) return true;
+      return countSyllables(cleaned) >= 3;
+    }
+    return countSyllables(cleaned) >= 3;
+  }
+
+  function tokenizeWords(text) {
+    return text.match(/\b[a-zA-Z'-]+\b/g) || [];
+  }
+
+  function tokenizeSentences(text) {
+    // split on .  !  ? followed by whitespace or end of string
+    const parts = text.split(/[.!?]+\s*/);
+    return parts.filter(s => s.trim().length > 0);
+  }
+
+  function analyse(text) {
+    const sentences = tokenizeSentences(text);
+    const words     = tokenizeWords(text);
+
+    const sentenceCount = Math.max(sentences.length, 1);
+    const wordCount     = words.length;
+
+    if (wordCount === 0) return null;
+
+    const complexWords  = words.filter(isComplex);
+    const avgPerSentence = wordCount / sentenceCount;
+    const complexRatio   = complexWords.length / wordCount;
+    const fog = 0.4 * (avgPerSentence + 100 * complexRatio);
+
+    return {
+      wordCount,
+      sentenceCount,
+      complexCount: complexWords.length,
+      avgWords: avgPerSentence.toFixed(1),
+      fog: fog.toFixed(1)
+    };
+  }
+
+  function interpret(fog) {
+    const f = parseFloat(fog);
+    if (f < 9)  return { label: 'Easy reading (school level)',       cls: 'fog-easy' };
+    if (f < 13) return { label: 'Acceptable (high school / general)', cls: 'fog-medium' };
+    return       { label: 'Complex / academic writing',              cls: 'fog-hard' };
+  }
+
+  // ---------- UI ----------
+
+  const textInput     = document.getElementById('textInput');
+  const analyzeBtn    = document.getElementById('analyzeBtn');
+  const clearBtn      = document.getElementById('clearBtn');
+  const resultsDiv    = document.getElementById('results');
+
+  analyzeBtn.addEventListener('click', () => {
+    const text = textInput.value.trim();
+    if (!text) { alert('Please enter some text to analyse.'); return; }
+
+    const stats = analyse(text);
+    if (!stats) { alert('Could not detect any words in the text.'); return; }
+
+    document.getElementById('wordCount').textContent     = stats.wordCount;
+    document.getElementById('sentenceCount').textContent = stats.sentenceCount;
+    document.getElementById('complexCount').textContent  = stats.complexCount;
+    document.getElementById('avgWords').textContent      = stats.avgWords;
+    document.getElementById('fogIndex').textContent      = stats.fog;
+
+    const { label, cls } = interpret(stats.fog);
+    const badge = document.getElementById('fogBadge');
+    badge.textContent  = 'FOG ' + stats.fog + ' — ' + label;
+    badge.className    = 'fog-badge ' + cls;
+
+    document.getElementById('fogInterpretation').textContent =
+      'A Gunning Fog score of ' + stats.fog +
+      ' suggests the text is best understood by someone with a ' +
+      (parseFloat(stats.fog) < 9  ? 'middle-school' :
+       parseFloat(stats.fog) < 13 ? 'high-school'   : 'college') +
+      ' reading level or above.';
+
+    resultsDiv.style.display = 'block';
+  });
+
+  clearBtn.addEventListener('click', () => {
+    textInput.value = '';
+    resultsDiv.style.display = 'none';
+  });
+</script>
+</body>
+</html>
