@@ -159,10 +159,10 @@
 
 <div class="card">
   <label for="textInput">Paste or type your text below:</label>
-  <textarea id="textInput" placeholder="Enter at least one sentence to analyse…"></textarea>
+  <textarea id="textInput" placeholder="Enter at least one sentence to analyze…"></textarea>
 
   <div class="actions">
-    <button id="analyzeBtn">Analyse</button>
+    <button id="analyzeBtn">Analyze</button>
     <button id="clearBtn">Clear</button>
   </div>
 
@@ -238,7 +238,7 @@
     return parts.filter(s => s.trim().length > 0);
   }
 
-  function analyse(text) {
+  function analyze(text) {
     const sentences = tokenizeSentences(text);
     const words     = tokenizeWords(text);
 
@@ -277,9 +277,9 @@
 
   analyzeBtn.addEventListener('click', () => {
     const text = textInput.value.trim();
-    if (!text) { alert('Please enter some text to analyse.'); return; }
+    if (!text) { alert('Please enter some text to analyze.'); return; }
 
-    const stats = analyse(text);
+    const stats = analyze(text);
     if (!stats) { alert('Could not detect any words in the text.'); return; }
 
     document.getElementById('wordCount').textContent     = stats.wordCount;
